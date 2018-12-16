@@ -1,0 +1,58 @@
+'use strict'
+require('dotenv').config()
+
+global.env = process.env.NODE_ENV || 'development'
+
+const autoload = require('./autoload')()
+
+const path = require('path')
+global.express = require('express')
+
+global.CONFIG = require(path.join(__dirname, '/app/config'))
+global._ = require('lodash')
+
+const mysql = require('mysql')
+const http = require('http')
+const app = express()
+const server = require('http').createServer(app)
+
+app.config = CONFIG
+
+global.db = mysql.createConnection({
+  host: CONFIG.DATABASE.HOST,
+  user: CONFIG.DATABASE.USER,
+  password: CONFIG.DATABASE.PASSWORD,
+  database: CONFIG.DATABASE.DB
+})
+
+autoload((err, result) => {
+  if (err) throw err
+
+	require(path.join(__dirname, '/app/config/express'))(app)
+
+  db.connect((err) => {
+    if (err) {
+      console.error('error connecting: ' + err.stack)
+      return
+    }
+
+    server.listen(app.get('port'), () => {
+      if (env === 'development') console.log(`\n✔ Tax Service ${CONFIG.SERVER.BASE_WEBHOST} in ${env} mode`)
+    })
+  })
+})
+
+process.on('uncaughtException', (err) => {
+  console.error(new Date() + ' uncaughtException: ', err.message)
+  console.error(err.stack)
+  process.exit(1)
+})
+
+process.on('SIGINT', () => {
+  db.end(() => {
+    process.exit(1)
+  })
+})
+
+module.exports.server = http.createServer(app)
+module.exports.db = db
