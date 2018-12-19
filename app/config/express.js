@@ -5,7 +5,6 @@
 const compression = require('compression')()
 const bodyParser = require('body-parser')
 const async = require('async')
-const path = require('path')
 const expressValidator = require('express-validator')
 const xssFilter = require('x-xss-protection')()
 const nocache = require('nocache')()
@@ -13,18 +12,28 @@ const uuidV4 = require('uuid/v4')
 
 const parallelMiddleware = middlewares => (req, res, next) => async.each(middlewares, (mw, cb) => mw(req, res, cb), next)
 
-module.exports = (app, rollbar) => {
+module.exports = (app) => {
   app.set('env', env)
   app.set('port', CONFIG.SERVER.PORT)
 
   app.use(parallelMiddleware([
     xssFilter,
     nocache,
-    bodyParser.json({limit: '2mb'}),
-    bodyParser.urlencoded({extended: true, limit: '2mb', parameterLimit: 1000}),
+    bodyParser.json({ limit: '2mb' }),
+    bodyParser.urlencoded({ extended: true, limit: '2mb', parameterLimit: 1000 }),
     compression,
     expressValidator()
   ]))
+
+  if (app.get('env') === 'development') {
+    const morgan = require('morgan')
+    const responseTime = require('response-time')()
+    const errorHandler = require('errorhandler')()
+
+    app.use(morgan('dev'))
+    app.use(responseTime)
+    app.use(errorHandler)
+  }
 
   require(CONFIG.ROOT + '/app/routes')(app)
 
@@ -32,6 +41,7 @@ module.exports = (app, rollbar) => {
     if (err.message && (~err.message.indexOf('not found') || (~err.message.indexOf('Cast to ObjectId failed')))) {
       return next()
     }
+
     const errorResults = {}
 
     errorResults.message = err.stack

@@ -33,7 +33,7 @@ module.exports = {
     var resultPrint = {}
 
     resultPrint.id = uuidV4()
-    resultPrint.status = status || 201
+    resultPrint.status = status || 200
 
     if (_.isObject(obj)) {
       resultPrint.data = obj
@@ -52,7 +52,7 @@ module.exports = {
     let tax = 0
     let isRefundable = true
     let type = 'Food'
-    
+
     if (code === 1) {
       tax = priceItem * 0.1
       isRefundable = true

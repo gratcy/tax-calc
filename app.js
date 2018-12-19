@@ -18,27 +18,24 @@ const server = require('http').createServer(app)
 
 app.config = CONFIG
 
-global.db = mysql.createConnection({
-  host: CONFIG.DATABASE.HOST,
-  user: CONFIG.DATABASE.USER,
-  password: CONFIG.DATABASE.PASSWORD,
-  database: CONFIG.DATABASE.DB
-})
+const db = require('express-myconnection')
+
+app.use(
+  db(mysql, {
+    host: CONFIG.DATABASE.HOST,
+    user: CONFIG.DATABASE.USER,
+    password: CONFIG.DATABASE.PASSWORD,
+    database: CONFIG.DATABASE.DB
+  })
+)
 
 autoload((err, result) => {
   if (err) throw err
 
-	require(path.join(__dirname, '/app/config/express'))(app)
+  require(path.join(__dirname, '/app/config/express'))(app)
 
-  db.connect((err) => {
-    if (err) {
-      console.error('error connecting: ' + err.stack)
-      return
-    }
-
-    server.listen(app.get('port'), () => {
-      if (env === 'development') console.log(`\n✔ Tax Service ${CONFIG.SERVER.BASE_WEBHOST} in ${env} mode`)
-    })
+  server.listen(app.get('port'), () => {
+    if (env === 'development') console.log(`\n✔ Tax Service ${CONFIG.SERVER.BASE_WEBHOST} in ${env} mode`)
   })
 })
 
