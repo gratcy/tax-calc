@@ -10,3 +10,4 @@ node_modules
 *_REMOTE_*
 *-lock.json
 *.lock
+.env
