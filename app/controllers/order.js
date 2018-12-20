@@ -6,13 +6,107 @@ const orderDetailModel = require('../models/order_detail')
 const itemsModel = require('../models/items')
 
 exports.get = (req, res) => {
-  req.checkParams('userId', 'userId is required').notEmpty()
+  req.checkHeaders('userid', 'userId is required').notEmpty()
 
   if (req.validationErrors()) {
     return MiscHelper.errorCustomStatus(res, req.validationErrors(true))
   }
 
-  return MiscHelper.responses(res, req.params)
+  async.waterfall([
+    (cb) => {
+      orderModel.getOrder(req, req.headers.userid, (errOrder, resultOrder) => {
+        cb(errOrder, resultOrder)
+      })
+    },
+    (dataOrder, cb) => {
+      let priceSubTotal = 0
+      let taxSubTotal = 0
+      let grandTotal = 0
+
+      const detailOrder = []
+      async.eachSeries(dataOrder, (order, nextOrder) => {
+        orderDetailModel.getOrderDetail(req, order.id, (errItems, resultItems) => {
+          if (errItems) console.error(errItems)
+
+          let calcItems = []
+          async.each(resultItems, (item, nextItem) => {
+            let itemTmp = _.merge(item, MiscHelper.itemCalculation(_.result(item, 'tax_code', 0), parseFloat(_.result(item, 'price', 0))))
+
+            priceSubTotal += itemTmp.price
+            taxSubTotal += itemTmp.tax
+            grandTotal += itemTmp.amount
+
+            calcItems.push(itemTmp)
+            nextItem()
+          }, errItem => {
+            order.priceSubTotal = priceSubTotal
+            order.taxSubTotal = taxSubTotal
+            order.grandTotal = grandTotal
+            detailOrder.push(_.merge(order, { items: calcItems }))
+            nextOrder(errItem)
+          })
+        })
+      }, errGetItems => {
+        cb(errGetItems, detailOrder)
+      })
+    }
+  ], (errGetOrder, resultGetOrder) => {
+    if (errGetOrder) {
+      return MiscHelper.errorCustomStatus(res, errGetOrder, 400)
+    } else {
+      return MiscHelper.responses(res, resultGetOrder)
+    }
+  })
+}
+
+exports.getDetail = (req, res) => {
+  req.checkHeaders('userid', 'userId is required').notEmpty()
+  req.checkParams('orderId', 'orderId is required').notEmpty()
+
+  if (req.validationErrors()) {
+    return MiscHelper.errorCustomStatus(res, req.validationErrors(true))
+  }
+
+  async.waterfall([
+    (cb) => {
+      orderModel.getOrderDetail(req, [req.headers.userid, req.params.orderId], (errOrder, resultOrder) => {
+        cb(errOrder, resultOrder)
+      })
+    },
+    (dataOrder, cb) => {
+      let priceSubTotal = 0
+      let taxSubTotal = 0
+      let grandTotal = 0
+
+      orderDetailModel.getOrderDetail(req, dataOrder.id, (errItems, resultItems) => {
+        if (errItems) console.error(errItems)
+
+        let calcItems = []
+        async.each(resultItems, (item, nextItem) => {
+          let itemTmp = _.merge(item, MiscHelper.itemCalculation(_.result(item, 'tax_code', 0), parseFloat(_.result(item, 'price', 0))))
+
+          priceSubTotal += itemTmp.price
+          taxSubTotal += itemTmp.tax
+          grandTotal += itemTmp.amount
+
+          calcItems.push(itemTmp)
+          nextItem()
+        }, errItem => {
+          dataOrder.priceSubTotal = priceSubTotal
+          dataOrder.taxSubTotal = taxSubTotal
+          dataOrder.grandTotal = grandTotal
+
+          cb(errItem, _.merge(dataOrder, { items: calcItems }))
+        })
+      })
+    }
+  ], (errGetOrder, resultGetOrder) => {
+    if (errGetOrder) {
+      return MiscHelper.errorCustomStatus(res, errGetOrder, 400)
+    } else {
+      return MiscHelper.responses(res, resultGetOrder)
+    }
+  })
 }
 
 exports.checkout = (req, res) => {
@@ -25,27 +119,34 @@ exports.checkout = (req, res) => {
   const itemIds = req.body.itemIds
   const userId = req.headers.userid || 0
 
+  let priceSubTotal = 0
+  let taxSubTotal = 0
+  let grandTotal = 0
+
   async.waterfall([
     (cb) => {
-      let totalPrice = 0
       let orderItems = []
 
       async.eachSeries(itemIds, (item, nextItem) => {
         itemsModel.getItemDetail(req, item, (errItem, resultItem) => {
-          totalPrice += MiscHelper.itemCalculation(_.result(resultItem, 'tax_code', 0), parseFloat(_.result(resultItem, 'price', 0))).amount
-          orderItems.push(resultItem)
+          let itemTmp = _.merge(resultItem, MiscHelper.itemCalculation(_.result(resultItem, 'tax_code', 0), parseFloat(_.result(resultItem, 'price', 0))))
+
+          priceSubTotal += itemTmp.price
+          taxSubTotal += itemTmp.tax
+          grandTotal += itemTmp.amount
+
+          orderItems.push(itemTmp)
           nextItem(errItem)
         })
       }, errLoopItems => {
-        cb(errLoopItems, totalPrice, orderItems)
+        cb(errLoopItems, orderItems)
       })
     },
-    (totalPrice, orderItems, cb) => {
+    (orderItems, cb) => {
       const dataOrder = {
         userId: userId,
         orderdate: new Date(),
         duedate: new Date(),
-        total: totalPrice,
         status: 'unpaid'
       }
 
@@ -67,6 +168,9 @@ exports.checkout = (req, res) => {
           nextItem(errOrderDetail)
         })
       }, errLoopItems => {
+        dataOrder.priceSubTotal = priceSubTotal
+        dataOrder.taxSubTotal = taxSubTotal
+        dataOrder.grandTotal = grandTotal
         cb(errLoopItems, dataOrder, orderItems)
       })
     }

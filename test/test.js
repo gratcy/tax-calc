@@ -30,7 +30,7 @@ describe('Index Page', () => {
 
 describe('Checkout Scenario', () => {
   const dataOrder= {
-    itemIds: [1, 2]
+    itemIds: [1, 2, 3]
   }
 
   it('POST /v1/order/checkout - Should 200 : Success Checkout Order', (done) => {
@@ -47,10 +47,49 @@ describe('Checkout Scenario', () => {
         res.body.status.should.equal(200)
         res.body.data.should.have.property('id')
         res.body.data.should.have.property('userId')
-        res.body.data.should.have.property('total')
+        res.body.data.should.have.property('grandTotal')
         res.body.data.should.have.property('status')
         res.body.data.should.have.property('items')
+        global.orderId = res.body.data.id
+        expect(res.body.data.items).is.an('array')
 
+        done()
+      })
+  })
+
+  it('GET /v1/order/get - Should 200 : Success Checkout Order', (done) => {
+    server
+      .get('/v1/order/get')
+      .set('Authorization', 'X-SHOPEE-AUTH')
+      .set('x-token-client', '123')
+      .set('userid', '1')
+      .expect('Content-type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        res.status.should.equal(200)
+        res.body.status.should.equal(200)
+        expect(res.body.data).is.an('array')
+
+        done()
+      })
+  })
+
+  it('GET /v1/order/detail/:orderId - Should 200 : Success Get Order Detail', (done) => {
+    server
+      .get('/v1/order/detail/' + orderId)
+      .set('Authorization', 'X-SHOPEE-AUTH')
+      .set('x-token-client', '123')
+      .set('userid', '1')
+      .expect('Content-type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        res.status.should.equal(200)
+        res.body.status.should.equal(200)
+        res.body.data.should.have.property('userid')
+        res.body.data.should.have.property('orderdate')
+        res.body.data.should.have.property('duedate')
+        res.body.data.should.have.property('grandTotal')
+        res.body.data.should.have.property('items')
         expect(res.body.data.items).is.an('array')
 
         done()

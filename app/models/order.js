@@ -1,10 +1,17 @@
 'use strict'
 
 module.exports = {
-  getOrder: (conn, callback) => {
+  getOrder: (conn, userId, callback) => {
     conn.getConnection((errConnection, connection) => {
-      connection.query(`SELECT * from order_tab WHERE status='active'`, (err, rows) => {
+      connection.query('SELECT * from order_tab WHERE userid = ? ORDER BY id DESC', userId, (err, rows) => {
         callback(err, rows)
+      })
+    })
+  },
+  getOrderDetail: (conn, data, callback) => {
+    conn.getConnection((errConnection, connection) => {
+      connection.query('SELECT * from order_tab WHERE userid = ? AND id = ?', data, (err, rows) => {
+        callback(err, _.result(rows, '[0]', {}))
       })
     })
   },

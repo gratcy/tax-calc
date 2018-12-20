@@ -1,9 +1,9 @@
 'use strict'
 
 module.exports = {
-  getOrderDetail: (conn, id, callback) => {
+  getOrderDetail: (conn, orderId, callback) => {
     conn.getConnection((errConnection, connection) => {
-      connection.query(`SELECT a.price,a.tax_code,a.item_id,b.name from order_detail_tab a WHERE a.status='active' LEFT JOIN items_tab B ON a.item_id=b.id`, (err, rows, fields) => {
+      connection.query(`SELECT a.price,a.tax_code,b.item_name from order_detail_tab a LEFT JOIN items_tab b ON a.item_id=b.id WHERE a.status='active' AND a.order_id = ?`, orderId, (err, rows) => {
         callback(err, rows)
       })
     })
