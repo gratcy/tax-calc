@@ -1,6 +1,6 @@
 'use strict'
 
-const PORT = (process.env.NODE_ENV === 'development' ? process.env.PORT : 1818) || 3000
+const PORT = process.env.NODE_ENV === 'development' ? process.env.PORT : 3000
 const BASE_DOMAIN = process.env.BASE_DOMAIN || '0.0.0.0'
 
 const CONFIG = {
