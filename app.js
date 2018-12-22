@@ -46,9 +46,7 @@ process.on('uncaughtException', (err) => {
 })
 
 process.on('SIGINT', () => {
-  db.end(() => {
-    process.exit(1)
-  })
+  process.exit(1)
 })
 
 module.exports.server = http.createServer(app)

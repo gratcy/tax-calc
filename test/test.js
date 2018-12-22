@@ -28,6 +28,95 @@ describe('Index Page', () => {
   })
 })
 
+describe('Item Scenario', () => {
+  const dataItem = {
+    item_name: 'Susu Kaleng',
+    tax_code: 1,
+    price: 11500
+  }
+
+  it('POST /v1/item/create - Should 200 : Success Create Item', (done) => {
+    server
+      .post('/v1/item/create')
+      .set('Authorization', 'X-SHOPEE-AUTH')
+      .set('x-token-client', '123')
+      .set('userid', '1')
+      .send(dataItem)
+      .expect('Content-type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        res.status.should.equal(200)
+        res.body.status.should.equal(200)
+        res.body.data.should.have.property('id')
+        res.body.data.should.have.property('item_name')
+        res.body.data.should.have.property('tax_code')
+        res.body.data.should.have.property('price')
+        global.itemId = res.body.data.id
+
+        done()
+      })
+  })
+
+  it('POST /v1/item/update/:itemId - Should 200 : Success Update Item', (done) => {
+    dataItem.price = 11000
+    server
+      .post('/v1/item/update/' + itemId)
+      .set('Authorization', 'X-SHOPEE-AUTH')
+      .set('x-token-client', '123')
+      .set('userid', '1')
+      .send(dataItem)
+      .expect('Content-type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        res.status.should.equal(200)
+        res.body.status.should.equal(200)
+        res.body.data.should.have.property('id')
+        res.body.data.should.have.property('item_name')
+        res.body.data.should.have.property('tax_code')
+        res.body.data.should.have.property('price')
+        global.itemId = res.body.data.id
+
+        done()
+      })
+  })
+
+  it('GET /v1/item/get - Should 200 : Success Get Items', (done) => {
+    server
+      .get('/v1/item/get')
+      .set('Authorization', 'X-SHOPEE-AUTH')
+      .set('x-token-client', '123')
+      .set('userid', '1')
+      .expect('Content-type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        res.status.should.equal(200)
+        res.body.status.should.equal(200)
+        expect(res.body.data).is.an('array')
+
+        done()
+      })
+  })
+
+  it('GET /v1/item/delete/:itemId - Should 200 : Success Delete Item', (done) => {
+    server
+      .get('/v1/item/delete/' + itemId)
+      .set('Authorization', 'X-SHOPEE-AUTH')
+      .set('x-token-client', '123')
+      .set('userid', '1')
+      .expect('Content-type', /json/)
+      .expect(200)
+      .end((err, res) => {
+        res.status.should.equal(200)
+        res.body.status.should.equal(200)
+        res.body.data.should.have.property('id')
+        res.body.data.should.have.property('status')
+        res.body.data.status.should.equal('inactive')
+
+        done()
+      })
+  })
+})
+
 describe('Checkout Scenario', () => {
   const dataOrder= {
     itemIds: [1, 2, 3]

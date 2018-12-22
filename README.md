@@ -30,14 +30,27 @@ API Documentation by Postman
 </p>
 
 ## Deployment Setup
-In production mode, you dont need to clone this repo manually. Because already setup in docker. Just follow below instructions.
+In production environment, you dont need to clone this repo manually. Because already setup in docker. Just follow below instructions.
 
 ### Prerequisites
+##### Production Environment
 - Install Docker [https://download.docker.com/](https://download.docker.com/)
 - git clone git@github.com:gratcy/docker-setup.git
 - docker-compose build
 - docker-compose -d up
 - Setting your host 127.0.0.1 to [http://api.shopee.local/](http://api.shopee.local/) by default in ./nginx/api-shopee.conf
+
+##### Development Environment
+- Node.js - Download and Install [Node.js](https://nodejs.org/en/) with [NVM](https://github.com/creationix/nvm) (Node Version Manager) - Simple bash script to manage multiple active node.js versions.
+- MySQL - Download and Install [MySQL](https://www.mysql.com/downloads/) - Make sure it's running on the default port.
+
+```
+  $ git@github.com/gratcy/news-k.git
+  $ cd news-k
+  $ cp .env.sample .env
+  $ npm install
+  $ npm start
+```
 
 ### License
 ----

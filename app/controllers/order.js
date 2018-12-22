@@ -156,17 +156,21 @@ exports.checkout = (req, res) => {
     },
     (dataOrder, orderItems, cb) => {
       async.eachSeries(orderItems, (item, nextItem) => {
-        let dataOrderDetail = {
-          order_id: dataOrder.id,
-          item_id: item.id,
-          price: item.price,
-          tax_code: item.tax_code,
-          status: 'active'
-        }
+        if (item.id > 0) {
+          let dataOrderDetail = {
+            order_id: dataOrder.id,
+            item_id: item.id,
+            price: item.price,
+            tax_code: item.tax_code,
+            status: 'active'
+          }
 
-        orderDetailModel.insert(req, dataOrderDetail, (errOrderDetail, resultOrderDetail) => {
-          nextItem(errOrderDetail)
-        })
+          orderDetailModel.insert(req, dataOrderDetail, (errOrderDetail, resultOrderDetail) => {
+            nextItem(errOrderDetail)
+          })
+        } else {
+          nextItem()
+        }
       }, errLoopItems => {
         dataOrder.priceSubTotal = priceSubTotal
         dataOrder.taxSubTotal = taxSubTotal

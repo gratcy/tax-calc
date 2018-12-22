@@ -1,9 +1,16 @@
 'use strict'
 
 module.exports = {
+  getItems: (conn, callback) => {
+    conn.getConnection((errConnection, connection) => {
+      connection.query(`SELECT id, item_name, tax_code, price from items_tab WHERE status='active'`, (err, rows) => {
+        callback(err, rows)
+      })
+    })
+  },
   getItemDetail: (conn, itemId, callback) => {
     conn.getConnection((errConnection, connection) => {
-      connection.query(`SELECT * from items_tab WHERE status='active' AND id = ? `, itemId, (err, rows) => {
+      connection.query(`SELECT id, item_name, tax_code, price from items_tab WHERE status='active' AND id = ? `, itemId, (err, rows) => {
         callback(err, _.result(rows, '[0]', []))
       })
     })
