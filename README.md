@@ -3,8 +3,6 @@ API for Shopee Calculate Tax Order
 
 [![Code Style](https://img.shields.io/badge/code%20style-standard-green.svg)](https://github.com/feross/standard)
 
-
-[Installation](#installation) |
 [API Documentation](#api-documentation) |
 [Database Design](#database-design) |
 [Deployment Setup](#deployment-setup) |
