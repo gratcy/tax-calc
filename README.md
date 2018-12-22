@@ -18,7 +18,7 @@ API for Shopee Calculate Tax Order
 
 ## API Documentation
 API Documentation by Postman
-[https://documenter.getpostman.com/view/537028/RzfnkSYc](https://documenter.getpostman.com/view/537028/RzfnkSYc)
+[https://documenter.getpostman.com/view/537028/Rzn8Pgsh](https://documenter.getpostman.com/view/537028/Rzn8Pgsh)
 
 ## Database Design
 
