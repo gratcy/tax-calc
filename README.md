@@ -7,7 +7,7 @@ API for Shopee Calculate Tax Order
 [Installation](#installation) |
 [API Documentation](#api-documentation) |
 [Database Design](#database-design) |
-[Production Environment](#production-environment) |
+[Deployment Setup](#deployment-setup) |
 [License](#license)
 
 <p>
@@ -31,44 +31,15 @@ API Documentation by Postman
   </blockquote>
 </p>
 
-## Installation
+## Deployment Setup
+In production mode, you dont need to clone this repo manually. Because already setup in docker. Just follow below instructions.
 
 ### Prerequisites
-- Node.js - Download and Install [Node.js](https://nodejs.org/en/) with [NVM](https://github.com/creationix/nvm) (Node Version Manager) - Simple bash script to manage multiple active node.js versions.
-- MySQL - Download and Install [MySQL](https://www.mysql.com/downloads/) - Make sure it's running on the default port.
-
-```
-  $ git@github.com/gratcy/tax-calc.git
-  $ cd tax-calc
-  $ cp .env.sample .env
-  $ npm install
-  $ npm start
-```
-
-## Production Environment
-
-To setup on production you just config all access to your service on [ecosystem.json](https://github.com/gratcy/tax-calc/blob/dev/ecosystem.json). We use [PM2](https://pm2.io/doc/en/runtime/overview) to deploy our apps to production from you local machine and we use `PM2 Runtime` to running process manager on production
-
-**Start application for firstime on production server**
-
-```
-$ npm run start-production
-
-```
-
-
-**Deployment to production server**
-
-Currently this deployment process still manually from your local machine. We use **PM2** `ecosystem.json` as configuration for deployment spesific server.
-
-To start release/deploy your code to production, we need to merge all released code to branch `prod`. The first need to do before merging code to prod branch is to created [pull request](https://github.com/gratcy/tax-calc/pulls) on github from your featured branch to branch `dev` (after that make PR from dev to prod branch), or direct to branch `prod` if its an hotfix.
-
-After all the code has been merge to branch prod, now you can run deploy script from your local machine/laptop by running script below:
-
-```
-$ npm run deploy-production
-
-```
+- Install Docker [https://download.docker.com/](https://download.docker.com/)
+- git clone git@github.com:gratcy/docker-setup.git
+- docker-compose build
+- docker-compose -d up
+- Setting your host 127.0.0.1 to [http://api.shopee.local/](http://api.shopee.local/) by default in ./nginx/api-shopee.conf
 
 ### License
 ----
