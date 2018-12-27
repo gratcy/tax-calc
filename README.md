@@ -45,8 +45,8 @@ In production environment, you dont need to clone this repo manually. Because al
 - MySQL - Download and Install [MySQL](https://www.mysql.com/downloads/) - Make sure it's running on the default port.
 
 ```
-  $ git@github.com/gratcy/news-k.git
-  $ cd news-k
+  $ git@github.com/gratcy/tax-calc.git
+  $ cd tax-calc
   $ cp .env.sample .env
   $ npm install
   $ npm start
